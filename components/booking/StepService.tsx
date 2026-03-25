@@ -57,7 +57,16 @@ export default function StepService({
 
   const handleSelect = (service: Service) => {
     setSelectedId(String(service.id))
-    onUpdate({ serviceId: String(service.id), serviceName: getServiceName(service), servicePrice: getServicePrice(service) })
+    onUpdate({
+      serviceId: String(service.id),
+      serviceName: getServiceName(service),
+      servicePrice: getServicePrice(service),
+      // Clear downstream employee selection when service changes
+      employeeId: undefined,
+      employeeName: undefined,
+      anyPerson: false,
+      eligibleEmployeeIds: undefined,
+    })
   }
 
   const handleContinue = () => {

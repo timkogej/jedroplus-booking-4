@@ -21,8 +21,8 @@ import StepInfo from '@/components/booking/StepInfo'
 import StepConfirmation from '@/components/booking/StepConfirmation'
 
 const DEFAULT_STEPS: BookingStepConfig[] = [
-  { id: 'employee', type: 'employee', title: 'Specialist', required: true },
   { id: 'service', type: 'service', title: 'Service', required: true },
+  { id: 'employee', type: 'employee', title: 'Specialist', required: true },
   { id: 'datetime', type: 'datetime', title: 'Date & Time', required: true },
   { id: 'info', type: 'info', title: 'Your Info', required: true },
   { id: 'confirmation', type: 'confirmation', title: 'Confirm', required: true },
@@ -36,6 +36,7 @@ const INITIAL_SELECTION: BookingSelection = {
   phone: '',
   gender: '',
   notes: '',
+  privacyConsent: false,
   marketingConsent: false,
 }
 
@@ -128,14 +129,25 @@ export default function BookingPage() {
             serviceCategories={initData.serviceCategories}
           />
         )
-      case 'employee':
+      case 'employee': {
+        // Filter employees to those eligible for the selected service
+        const rawIds = selection.serviceId && initData.employeesByServiceId
+          ? (initData.employeesByServiceId[String(selection.serviceId)] ?? null)
+          : null
+        const eligibleSet = rawIds ? new Set(rawIds.map(String)) : null
+        const filteredEmployees = eligibleSet
+          ? initData.employees_ui.filter((e) => eligibleSet.has(String(e.id)))
+          : initData.employees_ui
+        const eligibleEmployeeIds = filteredEmployees.map((e) => String(e.id))
         return (
           <StepEmployee
             {...commonProps}
-            employeesUI={initData.employees_ui}
+            employeesUI={filteredEmployees}
+            eligibleEmployeeIds={eligibleEmployeeIds}
             showBack={currentStep > 0}
           />
         )
+      }
       case 'datetime':
         return <StepDateTime {...commonProps} />
       case 'info':

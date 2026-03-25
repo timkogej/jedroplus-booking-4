@@ -46,6 +46,7 @@ export default function StepDateTime({
       serviceId: selection.serviceId,
       employeeId: selection.anyPerson ? null : (selection.employeeId || null),
       anyPerson: selection.anyPerson,
+      employeeIds: selection.anyPerson ? (selection.eligibleEmployeeIds ?? []) : undefined,
     })
       .then((data) => {
         setSlots(data.slots || [])

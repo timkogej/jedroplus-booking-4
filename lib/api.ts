@@ -43,18 +43,23 @@ export async function getAvailableSlots(params: {
   serviceId: string
   employeeId: string | null
   anyPerson: boolean
+  employeeIds?: string[]
 }): Promise<SlotsResponse> {
+  const body: Record<string, unknown> = {
+    action: 'slots',
+    companySlug: params.companySlug,
+    date: params.date,
+    serviceId: params.serviceId,
+    employeeId: params.employeeId,
+    any_person: params.anyPerson,
+  }
+  if (params.anyPerson && params.employeeIds?.length) {
+    body.employeeIds = params.employeeIds
+  }
   const response = await fetch(BASE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'slots',
-      companySlug: params.companySlug,
-      date: params.date,
-      serviceId: params.serviceId,
-      employeeId: params.employeeId,
-      any_person: params.anyPerson,
-    }),
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
@@ -91,7 +96,9 @@ export async function createBooking(params: {
   phone: string
   gender: string
   notes: string
+  privacyConsent: boolean
   marketingConsent: boolean
+  consentTimestamp: string
 }): Promise<BookingConfirmation> {
   const response = await fetch(BASE_URL, {
     method: 'POST',
@@ -111,7 +118,9 @@ export async function createBooking(params: {
       customerPhone: params.phone,
       customerGender: params.gender,
       customerNote: params.notes,
+      gdprPrivacyConsent: params.privacyConsent,
       gdprSendMarketing: params.marketingConsent,
+      gdprConsentTimestamp: params.consentTimestamp,
     }),
   })
 

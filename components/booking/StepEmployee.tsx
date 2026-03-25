@@ -9,6 +9,7 @@ interface Props {
   businessConfig: BusinessConfig
   selection: BookingSelection
   employeesUI: EmployeeUI[]
+  eligibleEmployeeIds: string[]
   showBack?: boolean
   onUpdate: (data: Partial<BookingSelection>) => void
   onNext: () => void
@@ -20,22 +21,24 @@ export default function StepEmployee({
   businessConfig,
   selection,
   employeesUI,
+  eligibleEmployeeIds,
   showBack = true,
   onUpdate,
   onNext,
   onBack,
 }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(
-    selection.anyPerson ? 'any' : (selection.employeeId || null)
+    selection.anyPerson ? 'any' : (selection.employeeId ? String(selection.employeeId) : null)
   )
 
-  // Auto-skip if only one employee (guard: skip only on first visit, not when navigating back)
+  // Auto-select if only one eligible employee (guard: skip only on first visit, not when navigating back)
   useEffect(() => {
     if (employeesUI.length === 1 && !selection.employeeId && !selection.anyPerson) {
       onUpdate({
         employeeId: employeesUI[0].id,
         employeeName: employeesUI[0].label,
         anyPerson: false,
+        eligibleEmployeeIds,
       })
       onNext()
     }
@@ -45,10 +48,10 @@ export default function StepEmployee({
   const handleSelect = (emp: EmployeeUI | 'any') => {
     if (emp === 'any') {
       setSelectedId('any')
-      onUpdate({ employeeId: null, employeeName: 'Any Available', anyPerson: true })
+      onUpdate({ employeeId: null, employeeName: 'Any Available', anyPerson: true, eligibleEmployeeIds })
     } else {
-      setSelectedId(emp.id)
-      onUpdate({ employeeId: emp.id, employeeName: emp.label, anyPerson: false })
+      setSelectedId(String(emp.id))
+      onUpdate({ employeeId: emp.id, employeeName: emp.label, anyPerson: false, eligibleEmployeeIds })
     }
   }
 
@@ -76,9 +79,14 @@ export default function StepEmployee({
         Select who you&apos;d like to see, or choose any available
       </p>
 
+      {/* Empty state */}
+      {employeesUI.length === 0 && (
+        <p className="text-sm text-gray-500 py-4">Za to storitev ni na voljo nobenega osebja.</p>
+      )}
+
       <div className="space-y-3">
-        {/* Any available option */}
-        <motion.button
+        {/* Any available option — only when there are eligible employees */}
+        {employeesUI.length > 0 && <motion.button
           onClick={() => handleSelect('any')}
           className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-200 ${
             selectedId === 'any'
@@ -108,10 +116,10 @@ export default function StepEmployee({
               <p className="text-xs text-gray-400">Find the best appointment for me</p>
             </div>
           </div>
-        </motion.button>
+        </motion.button>}
 
         {employeesUI.map((emp) => {
-          const isSelected = selectedId === emp.id
+          const isSelected = selectedId === String(emp.id)
           return (
             <motion.button
               key={emp.id}
@@ -190,14 +198,14 @@ export default function StepEmployee({
         )}
         <motion.button
           onClick={handleContinue}
-          disabled={!selectedId}
+          disabled={!selectedId || employeesUI.length === 0}
           className="flex-[2] py-4 rounded-2xl text-white font-semibold text-base transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
             backgroundColor: pc,
-            boxShadow: selectedId ? `0 4px 20px ${pc}30` : 'none',
+            boxShadow: selectedId && employeesUI.length > 0 ? `0 4px 20px ${pc}30` : 'none',
           }}
-          whileHover={selectedId ? { scale: 1.01 } : {}}
-          whileTap={selectedId ? { scale: 0.98 } : {}}
+          whileHover={selectedId && employeesUI.length > 0 ? { scale: 1.01 } : {}}
+          whileTap={selectedId && employeesUI.length > 0 ? { scale: 0.98 } : {}}
         >
           Continue
         </motion.button>

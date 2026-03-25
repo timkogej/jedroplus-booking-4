@@ -116,6 +116,7 @@ export interface BookingInitData {
   services: Service[]
   serviceCategories: ServiceCategory[]
   servicesByCategory: ServicesByCategory
+  employeesByServiceId?: Record<string, (string | number)[]>
   ui: UIConfig
   theme: ApiTheme
 }
@@ -163,6 +164,7 @@ export interface BookingSelection {
   employeeId?: string | null
   employeeName?: string
   anyPerson: boolean
+  eligibleEmployeeIds?: string[]
   date?: string
   time?: string
   firstName: string
@@ -171,5 +173,6 @@ export interface BookingSelection {
   phone: string
   gender: string
   notes: string
+  privacyConsent: boolean
   marketingConsent: boolean
 }

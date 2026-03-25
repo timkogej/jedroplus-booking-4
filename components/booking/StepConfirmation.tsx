@@ -53,7 +53,9 @@ export default function StepConfirmation({
         phone: selection.phone,
         gender: selection.gender,
         notes: selection.notes,
+        privacyConsent: selection.privacyConsent,
         marketingConsent: selection.marketingConsent,
+        consentTimestamp: new Date().toISOString(),
       })
       setConfirmed(true)
       setShowSuccess(true)

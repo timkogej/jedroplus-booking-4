@@ -27,6 +27,7 @@ export default function StepInfo({
   const [phone, setPhone] = useState(selection.phone)
   const [gender, setGender] = useState(selection.gender)
   const [notes, setNotes] = useState(selection.notes)
+  const [privacyConsent, setPrivacyConsent] = useState(selection.privacyConsent)
   const [marketingConsent, setMarketingConsent] = useState(selection.marketingConsent)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -42,6 +43,7 @@ export default function StepInfo({
       errs.email = 'Please enter a valid email'
     }
     if (!phone.trim()) errs.phone = 'Phone number is required'
+    if (!privacyConsent) errs.privacyConsent = 'Za nadaljevanje se morate strinjati s politiko zasebnosti.'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -55,6 +57,7 @@ export default function StepInfo({
         phone: phone.trim(),
         gender,
         notes: notes.trim(),
+        privacyConsent,
         marketingConsent,
       })
       onNext()
@@ -216,9 +219,56 @@ export default function StepInfo({
           />
         </div>
 
-        {/* Marketing consent */}
+        {/* Privacy consent - OBVEZEN */}
+        <div>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <div className="mt-0.5 flex-shrink-0">
+              <input
+                type="checkbox"
+                checked={privacyConsent}
+                onChange={(e) => {
+                  setPrivacyConsent(e.target.checked)
+                  if (e.target.checked) setErrors((prev) => ({ ...prev, privacyConsent: '' }))
+                }}
+                className="sr-only"
+              />
+              <div
+                className="w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
+                style={{
+                  borderColor: errors.privacyConsent ? '#ef4444' : privacyConsent ? pc : '#d1d5db',
+                  backgroundColor: privacyConsent ? pc : 'transparent',
+                }}
+              >
+                {privacyConsent && (
+                  <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}>
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <span className="text-sm text-gray-500">
+              Strinjam se z obdelavo osebnih podatkov za namen rezervacije termina.{' '}
+              <a
+                href="https://jedroplus.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:opacity-80"
+                style={{ color: pc }}
+              >
+                Preberi politiko zasebnosti
+              </a>
+            </span>
+          </label>
+          {errors.privacyConsent && (
+            <motion.p className="text-xs text-red-500 mt-1 ml-8" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
+              {errors.privacyConsent}
+            </motion.p>
+          )}
+        </div>
+
+        {/* Marketing consent - OPCIJSKI */}
         <label className="flex items-start gap-3 cursor-pointer">
-          <div className="mt-0.5">
+          <div className="mt-0.5 flex-shrink-0">
             <input
               type="checkbox"
               checked={marketingConsent}
@@ -240,7 +290,7 @@ export default function StepInfo({
             </div>
           </div>
           <span className="text-sm text-gray-500">
-            I agree to receive promotional emails and offers
+            Želim prejemati obvestila o promocijah in novostih.
           </span>
         </label>
       </div>
